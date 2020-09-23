@@ -1,0 +1,178 @@
+3. II. DEFINITION OF TELNET PROTOCOL
+
+   The purpose of Telnet Protocol is to provide a standard method of
+   interfacing terminals devices at one site to processes at another
+   site.
+
+   The Telnet Protocol is built up from three major substructures, first
+   the Initial Connection Protocol (ICP), second the Network Virtual
+   Terminal (NVT), and third the Telnet control signals described
+   herein.
+
+   Telnet user and server processes follow the ICP to establish
+   connections.  The term "Logger" has been associated with the set of
+   processes in the serving system which respond to the ICP and perform
+   the initial interactions e.g. obtain a name and password.  The ICP is
+   defined and the initial socket number and byte size parameters are
+   defined in "Current Network Protocols" (NIC #7104).
+
+   The data transmitted between the user and server programs (and vice
+   versa) is treated as a character stream with embedded control
+   signals.
+
+   Note that all code values are given in decimal.
+
+
+3.1. TELNET CONTROL SIGNALS
+
+   NAME             CODE    MEANING
+
+   DATA MARK        128     Used to mark a point in the data stream.
+                            Used in conjunction with INS.  See SYNCH.
+
+   BREAK            129     User-to-Server:  Has the same meaning to
+                            the server as the "Break," "Interrupt," or
+                            "Attention" button found on many terminals.
+
+                            Server-to-User:  Has the same meaning to
+                            to use as the "reverse break" used with
+                            some terminals.
+
+   NOP              130     No Operation.
+
+   NO ECHO          131     User-to-Server:  Asks the server not to
+                            return Echos of the transmitted data.
+
+                            Server-to-User:  States that the server is
+                            not sending echos of the transmitted data.
+                            Sent only as a reply to ECHO or NO ECHO,
+                            or to end the hide your input.
+
+   ECHO             132     User-to-Server:  Asks the server to send
+                            Echos of the transmitted data.
+
+                            Server-to User:  States that the server is
+                            sending echos of the transmitted data.
+                            Sent only as a reply to ECHO or NO ECHO.
+
+   Hide your input  133     The intention is that a server will send
+                            this signal to a user system which is
+                            echoing locally (to the user) when the user
+                            is about to type something secret (e.g. a
+                            password).  In this case, the user system
+                            is to suppress local echoing or overprint
+                            the input (or something) until the server
+                            sends a NOECHO signal.  In situations where
+                            the user system is not echoing locally,
+                            this signal must not be sent by the server.
+
+   INS              ---     This is the "Interrupt on Send" signal,
+                            defined by the Host-to-Host protocol and
+                            implemented by the Network Control Program
+                            (NCP).  See SYNCH.
+
+   SYNCH            ---     This is a condition indicated by the
+                            combination of the DATA MARK and the INS.
+
+                            User-to-Server:  The Server is to examine
+                            the input data stream looking for a DATA
+                            MARK signal; if a DATA MARK is found, the
+                            server must not process further until an
+                            INS is received.  If the server receives an
+                            INS, it is required to examine the data
+                            stream at once, taking any appropriate
+                            action on "break type" characters (e.g.
+                            etx, sub, BREAK), up to a DATA MARK signal
+                            and thereupon continue its normal processing.
+                            The passed over characters may be discarded.
+
+                            Server-to-User:  If the user finds a DATA
+                            MARK in the data stream, it must wait for
+                            an INS.  If the user receives an INS, it
+                            must examine and discard characters up to
+                            and including a DATA MARK.
+
+
+3.2. DATA TYPES
+
+   Telnet normally deals in ASCII characters, but there are provisions
+   for escaping to other code sets.  If one of these escapes is used, it
+   is undefined (here) whether or not the Telnet signals still have
+   meaning or even how to return to the ASCII set:  The Telnet signals
+   used to indicate a change of code set are:
+
+                      CODE          MEANING
+
+                      160           ASCII - Standard Telnet
+                      161           Transparent
+                      162           EBCDIC
+
+
+3.3. USER TELNET SIGNALS
+
+   The following signals are to be available to the human user to cause
+   the user Telnet to take the indicated action.
+
+   Transmit Now         -  Transmit all data entered and locally
+                           buffered now.  Intended to be used with line
+                           mode.
+
+   Suppress end-of-line -  Transmit all data entered and locally
+                           buffered now, and do not transmit the
+                           end-of-line immediately following this signal.
+
+
+3.4. STANDARD TELNET IMPLEMENTATION
+
+   Using Site
+
+   1)  User is able to enter and transmit all ASCII codes
+
+   2)  User is able to cause the Telnet signals BREAK, SYNCH, ECHO and
+       NOECHO to be transmitted.
+
+   3)  Provides for the User Telnet signals, (e.g. Transmit Now).
+
+   4)  Implements the CR LF end-of-line convention.
+
+   5)  Provides local echo for local user terminals.
+
+   6)  Correctly processes the Telnet signals BREAK, SYNCH, NOP, ECHO,
+       NOECHO, and Hide Your Input received from the server.
+
+   Serving Site:
+
+   1)  Provides a mapping between ASCII and the local character set.
+
+   2)  Correctly processes the Telnet signals BREAK, SYNCH, NOP, NOECHO,
+       and ECHO.
+
+   3)  Implements the CR LF end-of-line convention.
+
+   4)  Assumes the using site provides echoing.  May provide a server
+       echo mode.
+
+
+3.5. MINIMUM TELNET IMPLEMENTATION
+
+   Using Site:
+
+   1)  User must be able to enter and transmit all ASCII codes.
+
+   2)  Ignore and delete all Telnet signals from the serving site.
+
+   3)  Provide local echo for local user terminals.
+
+   4)  Implements CR LF end-of-line convention.
+
+   5)  Provide for the User Telnet signals.
+
+   Serving Site:
+
+   1)  Provide a mapping between ASCII and the local character set.
+
+   2)  Ignore and Delete all Telnet signals from the using site.
+
+   3)  Assume the using site provides echoing.
+
+   4)  Implements the CR LF end-of-line convention.
